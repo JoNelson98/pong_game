@@ -32,4 +32,5 @@ func (g *Game) CollideWithPaddle() {
 func (g *Game) Reset() {
 	g.Ball = NewBall()
 	g.Score = 0
+	g.State = StateGameOver
 }

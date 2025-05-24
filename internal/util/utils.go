@@ -9,3 +9,4 @@ func CalculateEasedSpeed(duration, maxSpeed, cruiseSpeed, accelerationTime float
 	}
 	return cruiseSpeed
 }
+
