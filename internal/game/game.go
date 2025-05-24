@@ -16,6 +16,7 @@ type GameState int
 const (
 	StateStartScreen GameState = iota
 	StateSinglePlayer
+	StateMultiplayerMenu
 	StateMultiplayer
 	StateGameOver
 )
@@ -26,6 +27,7 @@ type Game struct {
 	Score     int
 	HighScore int
 	PrevKeys map[ebiten.Key]bool
+	PlayerName string
 }
 
 func NewGame() *Game {
@@ -43,7 +45,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		text.Draw(screen,"PONG", basicfont.Face7x13,300,180, color.White)
 		text.Draw(screen,"Press 1 for Single Player", basicfont.Face7x13,220,220, color.White)
 		text.Draw(screen,"Press 2 for Multiplayer", basicfont.Face7x13,220,240, color.White)
-	case StateSinglePlayer,StateMultiplayer:
+	case StateSinglePlayer:
 		// draw paddle
 		vector.DrawFilledRect(screen,
 			float32(g.Paddle.X), float32(g.Paddle.Y),
@@ -62,7 +64,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 		highScoreStr := fmt.Sprintf("High Score: %d", g.HighScore)
 		text.Draw(screen, highScoreStr, basicfont.Face7x13, 10, 40, color.White)
-		case StateGameOver:
+	case StateMultiplayerMenu:
+			text.Draw(screen,"MULTIPLAYER MENU",basicfont.Face7x13,280,120,color.White )
+			text.Draw(screen,"Press H to host",basicfont.Face7x13,180,140,color.White )
+			text.Draw(screen,"Press J to Join",basicfont.Face7x13,180,160,color.White )
+	case StateGameOver:
 			text.Draw(screen,"GAME OVER", basicfont.Face7x13,280,120, color.White)
 			text.Draw(screen,"Press 1 to restart Press 2 for main menu", basicfont.Face7x13,180,140, color.White)
 	}
@@ -76,10 +82,10 @@ func (g *Game) Update() error {
 			g.State = StateSinglePlayer
 		}
 		if g.IsKeyJustPressed(ebiten.Key2){
-			g.State = StateMultiplayer
+			g.State = StateMultiplayerMenu
 		}
 		
-	case StateSinglePlayer, StateMultiplayer:
+	case StateSinglePlayer :
 		if g.IsKeyJustPressed(ebiten.KeyEscape){
 			g.State = StateStartScreen 
 			g.Score = 0
@@ -89,11 +95,23 @@ func (g *Game) Update() error {
 		g.Ball.Move()
 		g.CollideWithWall()
 		g.CollideWithPaddle()
-		
-	case StateGameOver:
-		if g.IsKeyJustPressed(ebiten.Key1){
-			g.State = StateSinglePlayer
+
+	case StateMultiplayerMenu:
+		if g.IsKeyJustPressed(ebiten.KeyEscape){
+			g.State = StateStartScreen 
 		}
+		if g.IsKeyJustPressed(ebiten.KeyH){
+			// go network.StartServer() // goroutine doesnt block
+			// g.State = StateConnecting
+		}
+		if g.IsKeyJustPressed(ebiten.KeyJ){
+			// go network.ConnectToHost("127.0.0.1:8080") // hardcoded for now 
+			// g.State = StateConnecting
+		}
+	case StateGameOver:
+		// if g.IsKeyJustPressed(ebiten.Key1) {
+		// 	g.State = StateSinglePlayer
+		// }
 		if g.IsKeyJustPressed(ebiten.Key2){
 			g.State = StateStartScreen 
 		}
